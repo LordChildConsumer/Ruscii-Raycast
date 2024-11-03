@@ -6,9 +6,11 @@ use ruscii::terminal::Window;
 use ruscii::drawing::Pencil;
 use ruscii::keyboard::{KeyEvent, Key};
 
-const SHADE_DARK: char = '▓';
-const SHADE_MID: char = '▒';
+const SHADE_FULL: char  = '█';
+const SHADE_DARK: char  = '▓';
+const SHADE_MID: char   = '▒';
 const SHADE_LIGHT: char = '░';
+const SHADE_NONE: char  = ' ';
 
 
 fn main() {
@@ -23,7 +25,7 @@ fn main() {
 
     const MAP_X: i32 = 8;
     const MAP_Y: i32 = 8;
-    let mut map  = [
+    let map  = [
         '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', 
         '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', 
         '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', 
@@ -43,10 +45,9 @@ fn main() {
         
     ];
 
-    let player_x: f32 = 4.0;
-    let player_y: f32 = 4.0;
+    let mut player_x: f32 = 4.0;
+    let mut player_y: f32 = 4.0;
     let mut player_a: f32 = 0.0;
-
 
     
     app.run(|app_state: &mut State, window: &mut Window| {
@@ -70,6 +71,11 @@ fn main() {
             match key_down {
                 Key::A => player_a -= 0.1,
                 Key::D => player_a += 0.1,
+
+                Key::W => {
+                    player_x += player_a.sin() * 0.1;
+                    player_y  += player_a.cos() * 0.1;
+                }
 
                 _ => (),
             }
@@ -118,7 +124,7 @@ fn main() {
                     dist_to_wall = MAX_DEPTH;
                 } else {
                     // Ray is in bounds so check if it hits a wall
-                    if (map[(test_x * MAP_X + test_y) as usize] == '#') {
+                    if map[(test_x * MAP_X + test_y) as usize] == '#' {
                         hit_wall = true;
                     }
                 }
@@ -128,6 +134,14 @@ fn main() {
             let ceiling = ((win_size.y as f32 / 2.0) - (win_size.y as f32 / dist_to_wall)) as i32;
             let floor = win_size.y - ceiling;
 
+            // Shading
+            let shade = if dist_to_wall <= MAX_DEPTH / 4.0    { SHADE_FULL  }
+            else if dist_to_wall < MAX_DEPTH / 3.0                  { SHADE_DARK  }
+            else if dist_to_wall < MAX_DEPTH / 2.0                  { SHADE_MID   }
+            else if dist_to_wall < MAX_DEPTH                        { SHADE_LIGHT }
+            else                                                    { SHADE_NONE  };
+
+
             for y in 0..win_size.y {
                 let pos = Vec2::xy(x, y);
 
@@ -136,13 +150,19 @@ fn main() {
                     pencil.draw_char(' ', pos);
                 } else if y > ceiling && y <= floor {
                     // Wall
-                    pencil.draw_char('#', pos);
+                    pencil.draw_char(shade, pos);
                 } else {
                     // Floor
                     pencil.draw_char('.', pos);
                 }
             }
         }
+
+        // Show Stats
+        // pencil.draw_text(&format!("Player X: {}\nPlayer Y: {}\nPlayer A: {}", player_x, player_y, player_a), Vec2::xy(1, 1));
+        pencil.draw_text(&format!("Player X: {}", player_x), Vec2::xy(1, 1));
+        pencil.draw_text(&format!("Player y: {}", player_y), Vec2::xy(1, 2));
+        pencil.draw_text(&format!("Player A: {}", player_a), Vec2::xy(1, 3));
 
     });
 }
