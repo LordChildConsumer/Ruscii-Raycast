@@ -6,6 +6,11 @@ use ruscii::terminal::Window;
 use ruscii::drawing::Pencil;
 use ruscii::keyboard::{KeyEvent, Key};
 
+const SHADE_DARK: char = '▓';
+const SHADE_MID: char = '▒';
+const SHADE_LIGHT: char = '░';
+
+
 fn main() {
     let mut app = App::default();
 
@@ -38,9 +43,9 @@ fn main() {
         
     ];
 
-    let player_x: f32 = 8.0;
-    let player_y: f32 = 8.0;
-    let player_a: f32 = 0.0;
+    let player_x: f32 = 4.0;
+    let player_y: f32 = 4.0;
+    let mut player_a: f32 = 0.0;
 
 
     
@@ -51,14 +56,24 @@ fn main() {
         ////////////////////////////////////////////////////////////////
         ////  -----------------  Keyboard Input  -----------------  ////
         ////////////////////////////////////////////////////////////////
-        
+
+
         for key_event in app_state.keyboard().last_key_events() {
             match key_event {
                 KeyEvent::Pressed(Key::Esc) => app_state.stop(),
+
                 _ => (),
             }
         }
 
+        for key_down in app_state.keyboard().get_keys_down() {
+            match key_down {
+                Key::A => player_a -= 0.1,
+                Key::D => player_a += 0.1,
+
+                _ => (),
+            }
+        }
 
 
 
@@ -85,7 +100,6 @@ fn main() {
             let mut dist_to_wall = 0.0;
 
             let mut hit_wall = false;       // Ray hits wall
-            let boundary = false;       // Ray hits boundary between walls
 
             // Convert ray_angle to vector
             let eye_x = ray_angle.sin();
