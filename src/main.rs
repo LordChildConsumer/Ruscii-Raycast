@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 use ruscii::app::{App, State};
 use ruscii::spatial::Vec2;
 use ruscii::terminal::Window;
-use ruscii::drawing::Pencil;
+use ruscii::drawing::{Pencil, RectCharset};
 use ruscii::keyboard::{KeyEvent, Key};
 
 const SHADE_FULL: char  = '█';
@@ -23,8 +23,8 @@ fn main() {
     const MAX_DEPTH: f32 = 16.0;
     const FOV: f32 = PI / 4.0;
 
-    const MAP_X: i32 = 8;
-    const MAP_Y: i32 = 8;
+    const MAP_X: i32 = 16;
+    const MAP_Y: i32 = 16;
     let map  = [
         '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', 
         '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', 
@@ -42,12 +42,16 @@ fn main() {
         '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', 
         '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', 
         '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', 
-        
     ];
 
+    const PLAYER_MOVE_SPEED: f32 = 0.1;
+    const PLAYER_TURN_SPEED: f32 = 0.1;
     let mut player_x: f32 = 4.0;
     let mut player_y: f32 = 4.0;
     let mut player_a: f32 = 0.0;
+
+
+    let mut show_stats = false;
 
     
     app.run(|app_state: &mut State, window: &mut Window| {
@@ -62,19 +66,23 @@ fn main() {
         for key_event in app_state.keyboard().last_key_events() {
             match key_event {
                 KeyEvent::Pressed(Key::Esc) => app_state.stop(),
-
+                KeyEvent::Pressed(Key::F1) => show_stats = !show_stats,
                 _ => (),
             }
         }
 
         for key_down in app_state.keyboard().get_keys_down() {
             match key_down {
-                Key::A => player_a -= 0.1,
-                Key::D => player_a += 0.1,
+                Key::A => player_a -= PLAYER_TURN_SPEED,
+                Key::D => player_a += PLAYER_TURN_SPEED,
 
                 Key::W => {
-                    player_x += player_a.sin() * 0.1;
-                    player_y  += player_a.cos() * 0.1;
+                    player_x += player_a.sin() * PLAYER_MOVE_SPEED;
+                    player_y  += player_a.cos() * PLAYER_MOVE_SPEED;
+                },
+                Key::S => {
+                    player_x -= player_a.sin() * PLAYER_MOVE_SPEED;
+                    player_y  -= player_a.cos() * PLAYER_MOVE_SPEED;
                 }
 
                 _ => (),
@@ -96,13 +104,12 @@ fn main() {
         
         let mut pencil = Pencil::new(window.canvas_mut());
 
-
         for x in 0..win_size.x {
             // Get the projected ray angle
             let ray_angle = (player_a - (FOV / 2.0)) + (x as f32 / win_size.x as f32) * FOV;
 
             // Find distance to wall
-            let step_size = 0.1;         // Increment size for ray. Decrease to increase resolution
+            let step_size = 0.01;         // Increment size for ray. Decrease to increase resolution
             let mut dist_to_wall = 0.0;
 
             let mut hit_wall = false;       // Ray hits wall
@@ -119,7 +126,7 @@ fn main() {
                 let test_y = (player_y + eye_y * dist_to_wall) as i32;
 
                 // Is ray in bounds?
-                if test_x < 0 || test_x >= MAP_X || test_y < 0 || test_y >= MAP_Y {
+                if test_x < 0 || test_x > MAP_X || test_y < 0 || test_y > MAP_Y {
                     hit_wall = true;
                     dist_to_wall = MAX_DEPTH;
                 } else {
@@ -159,10 +166,13 @@ fn main() {
         }
 
         // Show Stats
-        // pencil.draw_text(&format!("Player X: {}\nPlayer Y: {}\nPlayer A: {}", player_x, player_y, player_a), Vec2::xy(1, 1));
-        pencil.draw_text(&format!("Player X: {}", player_x), Vec2::xy(1, 1));
-        pencil.draw_text(&format!("Player y: {}", player_y), Vec2::xy(1, 2));
-        pencil.draw_text(&format!("Player A: {}", player_a), Vec2::xy(1, 3));
-
+        if show_stats {
+            let stats_rect_set = RectCharset::double_lines();
+            pencil.draw_rect(&stats_rect_set, Vec2::xy(0, 0), Vec2::xy(19, 5)); // 19x5
+            pencil.draw_text(&format!("Player X: {:.2}", player_x), Vec2::xy(1, 1));
+            pencil.draw_text(&format!("Player y: {:.2}", player_y), Vec2::xy(1, 2));
+            pencil.draw_text(&format!("Player A: {:.2}", player_a.to_degrees()), Vec2::xy(1, 3));
+        }
+        
     });
 }
