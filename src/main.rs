@@ -79,10 +79,20 @@ fn main() {
                 Key::W => {
                     player_x += player_a.sin() * PLAYER_MOVE_SPEED;
                     player_y  += player_a.cos() * PLAYER_MOVE_SPEED;
+
+                    // TODO: Test movement before applying, rather than trying to undo it.
+                    if map[(player_y as i32 * MAP_X + player_x as i32) as usize] == '#' {
+                        player_x -= player_a.sin() * PLAYER_MOVE_SPEED;
+                        player_y  -= player_a.cos() * PLAYER_MOVE_SPEED;
+                    }
                 },
                 Key::S => {
                     player_x -= player_a.sin() * PLAYER_MOVE_SPEED;
                     player_y  -= player_a.cos() * PLAYER_MOVE_SPEED;
+                    if map[(player_y as i32 * MAP_X + player_x as i32) as usize] == '#' {
+                        player_x += player_a.sin() * PLAYER_MOVE_SPEED;
+                        player_y  += player_a.cos() * PLAYER_MOVE_SPEED;
+                    }
                 }
 
                 _ => (),
