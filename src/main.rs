@@ -1,3 +1,8 @@
+/*
+    INFO: This program is basically a 1:1 translation of OLC's tutorial on doing this in C++
+        - https://youtu.be/xW8skO7MFYw
+*/
+
 use std::f32::consts::PI;
 
 use ruscii::app::{App, State};
@@ -122,7 +127,8 @@ fn main() {
             let step_size = 0.01;         // Increment size for ray. Decrease to increase resolution
             let mut dist_to_wall = 0.0;
 
-            let mut hit_wall = false;       // Ray hits wall
+            let mut hit_wall = false;             // Ray hits wall
+            let mut hit_boundary = false;         // Edge of wall
 
             // Convert ray_angle to vector
             let eye_x = ray_angle.sin();
