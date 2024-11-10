@@ -94,6 +94,8 @@ fn main() {
                 Key::S => {
                     player_x -= player_a.sin() * PLAYER_MOVE_SPEED;
                     player_y  -= player_a.cos() * PLAYER_MOVE_SPEED;
+
+                    // TODO: Test movement before applying, rather than trying to undo it.
                     if map[(player_y as i32 * MAP_X + player_x as i32) as usize] == '#' {
                         player_x += player_a.sin() * PLAYER_MOVE_SPEED;
                         player_y  += player_a.cos() * PLAYER_MOVE_SPEED;
@@ -120,15 +122,19 @@ fn main() {
         let mut pencil = Pencil::new(window.canvas_mut());
 
         for x in 0..win_size.x {
-            // Get the projected ray angle
+            // Project ray
             let ray_angle = (player_a - (FOV / 2.0)) + (x as f32 / win_size.x as f32) * FOV;
 
             // Find distance to wall
-            let step_size = 0.01;         // Increment size for ray. Decrease to increase resolution
+            let step_size = 0.01;               // Increment size for ray. Decrease to increase resolution. Should probably make const
             let mut dist_to_wall = 0.0;
 
-            let mut hit_wall = false;             // Ray hits wall
-            let mut hit_boundary = false;         // Edge of wall
+            let mut hit_wall = false;
+
+            // TODO: Boundaries
+            // INFO: Timestamp https://youtu.be/xW8skO7MFYw?t=1806
+            // Do I even bother adding these or go straight to texture mapping...?
+            // let mut hit_boundary = false;         // Edge of wall
 
             // Convert ray_angle to vector
             let eye_x = ray_angle.sin();
@@ -175,16 +181,15 @@ fn main() {
                     // Wall
                     pencil.draw_char(shade, pos);
                 } else {
-                    // Floor
+                    // Floor shading
                     let b = 1.0 - ((y as f32 - win_size.y as f32 / 2.0) / (win_size.y as f32 / 2.0));
-
                     let floor_shade = if b < 0.25 { '#' }
                     else if b < 0.5                     { 'x' }
                     else if b < 0.75                    { '=' }
                     else if b < 0.9                     { '-' }
                     else                                { ' ' };
 
-
+                    // Floor
                     pencil.draw_char(floor_shade, pos);
                 }
             }
@@ -193,11 +198,15 @@ fn main() {
         // Show Stats
         if show_stats {
             let stats_rect_set = RectCharset::double_lines();
-            pencil.draw_rect(&stats_rect_set, Vec2::xy(0, 0), Vec2::xy(19, 6)); // 19x5
-            pencil.draw_text(&format!("Player X: {:.2}", player_x), Vec2::xy(1, 1));
-            pencil.draw_text(&format!("Player y: {:.2}", player_y), Vec2::xy(1, 2));
-            pencil.draw_text(&format!("Player A: {:.2}", player_a.to_degrees()), Vec2::xy(1, 3));
-            pencil.draw_text(&format!("Win Size: {:.2}x{:.2}", win_size.x, win_size.y), Vec2::xy(1, 4));
+            let rect_pos = Vec2::xy(0, 0);
+            let rect_size = Vec2::xy(19, 6); // 19x5
+
+            pencil.draw_filled_rect(' ', rect_pos, rect_size)
+                .draw_rect(&stats_rect_set, rect_pos, rect_size)
+                .draw_text(&format!("Player X: {:.2}", player_x), Vec2::xy(1, 1))
+                .draw_text(&format!("Player y: {:.2}", player_y), Vec2::xy(1, 2))
+                .draw_text(&format!("Player A: {:.2}", player_a.to_degrees()), Vec2::xy(1, 3))
+                .draw_text(&format!("Win Size: {:.2}x{:.2}", win_size.x, win_size.y), Vec2::xy(1, 4));
         }
         
     });
