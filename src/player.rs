@@ -12,6 +12,18 @@ pub struct Player {
 }
 
 impl Player {
+
+    ////////////////////////////////////////////////////////////////
+    
+    // Could probably just make these variables public but this is fine for now.
+
+    pub fn get_x(&self) -> f32 { self.pos_x }
+    pub fn get_y(&self) -> f32 { self.pos_y }
+    pub fn get_a(&self) -> f32 { self.angle }
+    
+    ////////////////////////////////////////////////////////////////
+    
+
     // Constructor
     pub fn new(
         pos_x: f32,
@@ -54,16 +66,6 @@ impl Player {
 
     // Check collisions before moving
     fn try_movement(&mut self, vx: f32, vy: f32) {
-        // TODO: Implement 'is_movement_valid'
-        // - Needs to convert the desired position to integer coordinates
-        // - Needs a reference to the map to check if said coordinates are empty
-        // -
-        // - Following snippet moves the player backwards if they're in a wall after having moved forward.
-        // if map[(player_y as i32 * MAP_X + player_x as i32) as usize] == '#' {
-        //     player_x -= player_a.sin() * PLAYER_MOVE_SPEED;
-        //     player_y  -= player_a.cos() * PLAYER_MOVE_SPEED;
-        // }
-
         // Get desired position in integer/map space
         let new_x = (self.pos_x + vx) as usize;
         let new_y = (self.pos_y + vy) as usize;
@@ -75,45 +77,4 @@ impl Player {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    pub fn get_x(&self) -> f32 { self.pos_x }
-    pub fn get_y(&self) -> f32 { self.pos_y }
-    pub fn get_a(&self) -> f32 { self.angle }
-    
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 }
-
-// for key_down in app_state.keyboard().get_keys_down() {
-//     match key_down {
-//         Key::A => player_a -= PLAYER_TURN_SPEED,
-//         Key::D => player_a += PLAYER_TURN_SPEED,
-
-//         // Move Forward
-//         Key::W => {
-//             player_x += player_a.sin() * PLAYER_MOVE_SPEED;
-//             player_y  += player_a.cos() * PLAYER_MOVE_SPEED;
-
-//             // TODO: Test movement before applying, rather than trying to undo it.
-//             if map[(player_y as i32 * MAP_X + player_x as i32) as usize] == '#' {
-//                 player_x -= player_a.sin() * PLAYER_MOVE_SPEED;
-//                 player_y  -= player_a.cos() * PLAYER_MOVE_SPEED;
-//             }
-//         },
-
-//         // Move Backward
-//         Key::S => {
-//             player_x -= player_a.sin() * PLAYER_MOVE_SPEED;
-//             player_y  -= player_a.cos() * PLAYER_MOVE_SPEED;
-
-//             // TODO: Test movement before applying, rather than trying to undo it.
-//             if map[(player_y as i32 * MAP_X + player_x as i32) as usize] == '#' {
-//                 player_x += player_a.sin() * PLAYER_MOVE_SPEED;
-//                 player_y  += player_a.cos() * PLAYER_MOVE_SPEED;
-//             }
-//         }
-
-//         _ => (),
-//     }
-// }
