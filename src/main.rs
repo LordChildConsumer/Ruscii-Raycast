@@ -1,6 +1,7 @@
 /*
-    INFO: This program is basically a 1:1 translation of OLC's tutorial on doing this in C++
-        - https://youtu.be/xW8skO7MFYw
+    INFO: This program references OLC's video on making raycast engine for CMD in C++.
+        - Part 1:   https://youtu.be/xW8skO7MFYw
+        - Part 2:   https://youtu.be/HEb2akswCcw
 */
 
 use std::f32::consts::PI;
